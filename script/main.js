@@ -1,5 +1,4 @@
 // グローバル定義　変数
-
 const BgCtrl = new Background();
 
 //------------------------------------------
@@ -23,7 +22,7 @@ function UpdateProfile(dt)
     str += "elapsed time : " + dt.toFixed(2) + " msec (target elapsed time : " + gGame.mDeltTime.toFixed(2) + ")\r\n";
     str += "FPS : " + (1000.0 / dt).toFixed(2) + "(target FPS : " + gGame.mTargetFPS + ") \r\n";
     str += "Processing time : " + Number(gGame.mProcessingTime).toFixed(2) + "msec\r\n";
-    if (BgCtrl.IsCompleteLoadAllImages())
+    if (ImgResHolder.IsCompleteLoadAllImages())
     {
         BgCtrl.UpdateBackground();
         BgCtrl.SetScore(parseInt(gGame.mLastUpdateTime / 1000));
@@ -43,6 +42,17 @@ function UpdateProfile(dt)
 function Update(dt)
 {
     UpdateProfile(dt);
+    // 更新
+    for (var i=0; i<gGame.mPlayerNum; ++i)
+    {
+        gGame.mPlayer[i].Update(dt)
+    }
+
+    // 描画
+    for (var i=0; i<gGame.mPlayerNum; ++i)
+    {
+        gGame.mPlayer[i].Draw(dt)
+    }
 }
 
 //==================================================

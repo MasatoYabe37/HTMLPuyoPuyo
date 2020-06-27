@@ -1,0 +1,12 @@
+class GameParam
+{
+    constructor()
+    {
+
+    }
+
+    Init()
+    {
+        
+    }
+}

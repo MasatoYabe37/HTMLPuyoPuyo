@@ -1,15 +1,37 @@
 class PlayerInfo
 {
     // 変数定義
-    BGCtrl;                 // 背景コントロール
+    // mPlayerID;
+    // mBGCtrl;                 // 背景コントロール
+    // mInput;
+    // mGameParam
 
-    init()
+    constructor(plid)
     {
-        this.BGCtrl = new Background();
-        this.BGCtrl.init();
+        this.mPlayerID = plid;
+        this.mBGCtrl = new Background();
+        this.mBGCtrl.Init();
+        this.mInput = new InputInfo();
+        this.mInput.Init();
+        this.mParam = new GameParam();
+        this.mParam.Init();
     }
 
-    isReady()
+    Init()
+    {
+    }
+
+    Update(dt)
+    {
+
+    }
+
+    Draw(dt)
+    {
+        
+    }
+
+    IsReady()
     {
         if (this.BGCtrl.IsCompleteLoadAllImages() == false) return false;
         

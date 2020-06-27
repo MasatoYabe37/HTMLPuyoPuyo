@@ -1,0 +1,12 @@
+class InputInfo
+{
+    constructor()
+    {
+
+    }
+
+    Init()
+    {
+        
+    }
+}
