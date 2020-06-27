@@ -1,0 +1,10 @@
+コーディング規約
+
+1. グローバル変数は、gをつける (例：gGameInfo)
+2. クラスのメンバ変数は、mをつける (例：mPosition)
+3. public変数は、ロワーキャメル (例： mPosition)
+4. private変数は、接頭辞 "_" + ロワーキャメル (例：_mPosition)
+5. public関数は、アッパーキャメル (例：GetPosition())
+6. private関数は、接頭辞 "_" + アッパーキャメル(例：_GetPosition())
+7. class名はアッパーキャメル
+8. ローカル変数、引数は、ロワーキャメル
