@@ -38,6 +38,12 @@ class ImageResourceHolder
         this.mPuyoImgList[2] = this._LoadImage("./resource/img/puyo_3.png");
         this.mPuyoImgList[3] = this._LoadImage("./resource/img/puyo_4.png");
         this.mPuyoImgList[4] = this._LoadImage("./resource/img/puyo_5.png");
+        this.mImgProjList = new Array();
+        this.mImgProjList[0] = this._LoadImage("./resource/img/puyo_1projection.png");
+        this.mImgProjList[1] = this._LoadImage("./resource/img/puyo_2projection.png");
+        this.mImgProjList[2] = this._LoadImage("./resource/img/puyo_3projection.png");
+        this.mImgProjList[3] = this._LoadImage("./resource/img/puyo_4projection.png");
+        this.mImgProjList[4] = this._LoadImage("./resource/img/puyo_5projection.png");
     }
 
 

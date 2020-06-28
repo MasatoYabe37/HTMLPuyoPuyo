@@ -180,6 +180,28 @@ class Background
             gGame.mMainCanvas.drawImage(img, sx, sy, sw, sh, x, y, w, h);
         }
     }
+    //--------------------------------------
+    // ぷよ予測位置描画
+    DrawPuyoProjection(kind, x, y)
+    {
+        x = x + this._mBGLeft;
+        y = y + this._mBGTop - gGame.mPuyoImgSize; // ぷよの描画だけは、右下が0,0にする
+        var w = gGame.mPuyoImgSize;
+        var h = gGame.mPuyoImgSize;
+        var sx = 0;
+        var sy = 0;
+        var sw = 620;
+        var sh = 620;
+        var img = null;
+        if (kind > 0 && kind <= gGame.PUYO_KIND_NUM)
+        {
+            img = gImgResHolder.mImgProjList[kind - 1];
+        }
+        if (img != null)
+        {
+            gGame.mMainCanvas.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        }
+    }
 
     // デバッグ用グリッド表示
     _DrawGrid()

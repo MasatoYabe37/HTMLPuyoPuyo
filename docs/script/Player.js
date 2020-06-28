@@ -39,6 +39,7 @@ class PlayerInfo
             this._GenerateNextPuyo();
         }
         this._NextPuyo();
+        this.mMoveState = this.eMoveState.Dropping;
     }
 
     //--------------------------------------
@@ -53,8 +54,22 @@ class PlayerInfo
     Update(dt)
     {
         // @TODO MoveState毎の処理に変更する
-        this._UpatePuyo(dt);
-
+        switch (this.mMoveState)
+        {
+            case this.eMoveState.None: break;
+            // ぷよが落ちてくるステート
+            case this.eMoveState.Dropping: this._UpatePuyo(dt); break;
+            // ぷよが落ち切った後の消えるチェック
+            case this.eMoveState.Check: this._CheckDestroyPuyo(); break;
+            // ぷよが消えた場合の消えた演出＆スコア加算
+            case this.eMoveState.DestroyAnim: this._UpdateDestroyPuyo(dt); break;
+            // ぷよが消えた後の、上にあるぷよを落とす処理
+            case this.eMoveState.Fall: this._UpdateFallPuyo(dt); break;
+            // ぷよが落ち着いた後の、次のぷよが落ち始めるまでの休憩時間
+            case this.eMoveState.NextInterval: this._UpdateNextInterval(dt); break;
+            // 次のぷよを生成(1F)いらないかも…？
+            case this.eMoveState.NextPuyo: this._NextPuyo(); break;
+        }
         // デバッグ表示
         this._DebugDrawInfo();
     }
@@ -65,6 +80,7 @@ class PlayerInfo
     {
         this.mBGCtrl.DrawBG();
 
+        this._DrawPuyoProjection();
         this._DrawPuyo();
 
         this.mBGCtrl.DrawFrame();
@@ -148,6 +164,7 @@ class PlayerInfo
             if (this.mParam.mPuyoFallCount > this.mParam.PUYO_FALL_COUNT)
             {
                 // @TODO ぷよを固定し、次のステートに進む
+                this.mMoveState = this.eMoveState.Check;
             }
         }
     }
@@ -228,6 +245,43 @@ class PlayerInfo
         }
         return true;
     }
+    //--------------------------------------
+    // ぷよが落ち切った後の消えるチェック
+    _CheckDestroyPuyo()
+    {
+
+    }
+    //--------------------------------------
+    // ぷよが消えた場合の消えた演出＆スコア加算
+    _UpdateDestroyPuyo(dt)
+    {
+
+    }
+    //--------------------------------------
+    // ぷよが消えた後の、上にあるぷよを落とす処理
+    _UpdateFallPuyo(dt)
+    {
+
+    }
+    //--------------------------------------
+    // ぷよが落ち着いた後の、次のぷよが落ち始めるまでの休憩時間
+    _UpdateNextInterval(dt)
+    {
+
+    }
+    //--------------------------------------
+    // 次のぷよを生成(1F)いらないかも…？
+    _NextPuyo()
+    {
+
+    }
+
+    //--------------------------------------
+    // ぷよ予測描画
+    _DrawPuyoProjection()
+    {
+
+    }
 
     //--------------------------------------
     // ぷよ関連描画
@@ -249,9 +303,11 @@ class PlayerInfo
         var puyo2 = parseInt(this.mParam.mCurrentPuyo % 10);
         // 位置を計算
         var actualX = this.mParam.mPuyoX * gGame.mPuyoImgSize;
+        var animX = gGame.mPuyoImgSize * (this.mParam.mPuyoMoveAnimSec / this.mParam.MOVE_ANIM_SEC);
         switch (this.mParam.mPuyoMoveState)
         {
-
+            case this.mParam.ePuyoMoveState.Right: actualX -= animX;  break;
+            case this.mParam.ePuyoMoveState.Left: actualX += animX; break;
         }
 
         // 回転量を計算
@@ -279,8 +335,8 @@ class PlayerInfo
         var vec_x = Math.cos(rotRad) * distance;
         var vec_y = Math.sin(rotRad) * distance;
 
-        this.mBGCtrl.DrawPuyoUnit(puyo1, actualX, this.mParam.mPuyoY);
-        this.mBGCtrl.DrawPuyoUnit(puyo2, actualX + vec_x, this.mParam.mPuyoY + vec_y);
+        this.mBGCtrl.DrawPuyoUnit(puyo1, actualX + animX, this.mParam.mPuyoY);
+        this.mBGCtrl.DrawPuyoUnit(puyo2, actualX + animX +vec_x, this.mParam.mPuyoY + vec_y);
 
         // @TODO 予測を表示
     }
@@ -332,7 +388,8 @@ class PlayerInfo
             }
             str += "\r\n"
         }
-        str += "\r\n"
+        str += "\r\n";
+        str += "Current Move State : " + this.mMoveState + "\r\n";
         str += "Current : " + this.mParam.mCurrentPuyo + "\r\n";
         for (var i=0; i<gGame.NEXT_NUM; i++)
         {
