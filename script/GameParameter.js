@@ -31,6 +31,8 @@ class GameParam
         this.mPuyoFallCount = 0;
         this.mPuyoState = this.ePuyoState.None;
         this.mPuyoDir = this.ePuyoDir.Up;
+        this.ROTATE_ANIM_SEC = 0.3;
+        this.MOVE_ANIM_SEC = 0.1;
     }
 
     Init(rndSeed)
@@ -42,7 +44,7 @@ class GameParam
             for (var x=0; x<gGame.PUYO_X_MAX; ++x)
             {
                 var index = GetMapIndex(x, y);
-                this.mMap[index] = 0;
+                this.mMap[index] = index % 5 + 1;
             }
         }
         this.mRand.Init(rndSeed);

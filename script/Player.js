@@ -107,13 +107,30 @@ class PlayerInfo
     // ぷよ関連描画
     _DrawPuyo()
     {
-        this.mBGCtrl.DrawPuyoUnit(0, this.mParam.mPuyoX, this.mParam.mPuyoY);
-        this.mBGCtrl.DrawPuyoUnit(0, this.PuyoGrid2Pos_X(0), this.PuyoGrid2Pos_Y(0));
-        this.mBGCtrl.DrawPuyoUnit(1, this.PuyoGrid2Pos_X(1), this.PuyoGrid2Pos_Y(1));
-        this.mBGCtrl.DrawPuyoUnit(2, this.PuyoGrid2Pos_X(2), this.PuyoGrid2Pos_Y(2));
-        this.mBGCtrl.DrawPuyoUnit(3, this.PuyoGrid2Pos_X(3), this.PuyoGrid2Pos_Y(3));
-        this.mBGCtrl.DrawPuyoUnit(4, this.PuyoGrid2Pos_X(4), this.PuyoGrid2Pos_Y(4));
-        this.mBGCtrl.DrawPuyoUnit(5, this.PuyoGrid2Pos_X(5), this.PuyoGrid2Pos_Y(5));
+        // すでに落ち切っているぷよを表示
+        for (var i=0; i<(gGame.PUYO_X_MAX * gGame.PUYO_Y_MAX); ++i)
+        {
+            var grid_x = GetPosX(i);
+            var grid_y = GetPosY(i);
+            var x = this.PuyoGrid2Pos_X(grid_x);
+            var y = this.PuyoGrid2Pos_Y(grid_y);
+
+            this.mBGCtrl.DrawPuyoUnit(this.mParam.mMap[i], x, y);
+        }
+
+        // 現在落ちているぷよを表示(支点)
+        var puyo1 = parseInt(this.mParam.mCurrentPuyo / 10);
+        var puyo2 = parseInt(this.mParam.mCurrentPuyo % 10);
+        this.mBGCtrl.DrawPuyoUnit(puyo1, this.mParam.mPuyoX, this.mParam.mPuyoY);
+        // @TODO 現在落ちているぷよを表示（もう一個の方）
+        
+        // this.mBGCtrl.DrawPuyoUnit(0, this.PuyoGrid2Pos_X(0), this.PuyoGrid2Pos_Y(0));
+        // this.mBGCtrl.DrawPuyoUnit(1, this.PuyoGrid2Pos_X(1), this.PuyoGrid2Pos_Y(1));
+        // this.mBGCtrl.DrawPuyoUnit(2, this.PuyoGrid2Pos_X(2), this.PuyoGrid2Pos_Y(2));
+        // this.mBGCtrl.DrawPuyoUnit(3, this.PuyoGrid2Pos_X(3), this.PuyoGrid2Pos_Y(3));
+        // this.mBGCtrl.DrawPuyoUnit(4, this.PuyoGrid2Pos_X(4), this.PuyoGrid2Pos_Y(4));
+        // this.mBGCtrl.DrawPuyoUnit(5, this.PuyoGrid2Pos_X(5), this.PuyoGrid2Pos_Y(5));
+        
     }
 
     //--------------------------------------

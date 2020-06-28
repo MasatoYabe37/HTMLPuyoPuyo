@@ -171,9 +171,9 @@ class Background
         var sw = 620;
         var sh = 620;
         var img = null;
-        if (kind >= 0 && kind < gGame.PUYO_KIND_NUM)
+        if (kind > 0 && kind <= gGame.PUYO_KIND_NUM)
         {
-            img = gImgResHolder.mPuyoImgList[kind];
+            img = gImgResHolder.mPuyoImgList[kind - 1];
         }
         if (img != null)
         {
