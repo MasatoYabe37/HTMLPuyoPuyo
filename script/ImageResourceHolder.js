@@ -78,4 +78,4 @@ class ImageResourceHolder
     }
 }
 
-const ImgResHolder = new ImageResourceHolder();
+const gImgResHolder = new ImageResourceHolder();
