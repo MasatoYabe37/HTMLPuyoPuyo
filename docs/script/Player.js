@@ -163,7 +163,26 @@ class PlayerInfo
             // これ以上下がれない
             if (this.mParam.mPuyoFallCount > this.mParam.PUYO_FALL_COUNT)
             {
-                // @TODO ぷよを固定し、次のステートに進む
+                // @TODO ぷよを固定する
+                var puyo1 = parseInt(this.mParam.mCurrentPuyo / 10);
+                var x1 = this.mParam.mPuyoX;
+                var y1 = parseInt(this.mParam.mPuyoY / gGame.mPuyoImgSize);
+                var index1 = GetMapIndex(x1,y1);
+                var puyo2 = this.mParam.mCurrentPuyo % 10;
+                var x2 = x1;
+                var y2 = y1;
+                switch (this.mParam.mPuyoDir)
+                {
+                    case this.mParam.ePuyoDir.Up: y2 = y1 - 1; break;
+                    case this.mParam.ePuyoDir.Right: x2 = x1 + 1; break;
+                    case this.mParam.ePuyoDir.Down: y2 = y1 + 1; break;
+                    case this.mParam.ePuyoDir.Left: x2 = x1 - 1; break;
+                }
+                var index2 = GetMapIndex(x2, y2);
+                
+                this.mParam.mMap[index1] = puyo1;
+                this.mParam.mMap[index2] = puyo2;
+                //次のステートに進む
                 this.mMoveState = this.eMoveState.Check;
             }
         }
