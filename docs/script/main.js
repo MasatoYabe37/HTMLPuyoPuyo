@@ -20,7 +20,11 @@ function OnStartApplication()
     rndSeed += minutesSeed;
     rndSeed += secondsSeed;
     rndSeed += millisecondsSeed;
+    
     gGame.Init(rndSeed);
+
+    Input = new InputManager(gGame.mMainCanvasElement);
+    
     setInterval(main, gGame.mDeltTime)
 }
 
