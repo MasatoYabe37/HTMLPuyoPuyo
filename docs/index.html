@@ -21,7 +21,7 @@
             }
             .mainCanvas
             {
-                position: fixed;
+                display: block;
             }
             .debug_right
             {
@@ -43,7 +43,10 @@
                 </form>
             </div>
             <div id="main" class="main">
-                <canvas id="mainCanvas">このブロックではCanvasエレメントを使用します。HTML5が有効ではない可能性があります。</canvas>
+                <canvas id="mainCanvas">
+                    このブロックではCanvasエレメントを使用します。<br/>
+                    表示されない場合は、HTML5が有効ではない可能性があります。<br/>
+                </canvas>
             </div>
             <div id="debug_right" class="debug_right">
                 <div id="trace"></div>

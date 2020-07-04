@@ -23,8 +23,8 @@ class PlayerInfo
         this.mMoveState = this.eMoveState.None;
         this.mPlayerID = plid;
         this.mBGCtrl = new Background();
-        this.mInput = new InputInfo();
         this.mParam = new GameParam();
+        this.mInput = new PlayerInput();
     }
 
     //--------------------------------------
@@ -32,7 +32,6 @@ class PlayerInfo
     Init(rndSeed)
     {
         this.mBGCtrl.Init(10, 10);
-        this.mInput.Init();
         this.mParam.Init(rndSeed);
         for (var i=0; i<gGame.NEXT_NUM; ++i)
         {
@@ -40,6 +39,7 @@ class PlayerInfo
         }
         this._NextPuyo();
         this.mMoveState = this.eMoveState.Dropping;
+        this.mInput.Init(this);
     }
 
     //--------------------------------------
@@ -53,6 +53,8 @@ class PlayerInfo
     // 更新
     Update(dt)
     {
+        // 入力を更新
+        this.mInput.Update();
         // @TODO MoveState毎の処理に変更する
         switch (this.mMoveState)
         {
@@ -115,23 +117,251 @@ class PlayerInfo
     // ぷよ関連更新
     _UpatePuyo(dt)
     {
-        // @TODO Input処理
+        // Input処理
+        var isRot = this.mInput.mIsTouchEnd && this.mInput.mIsRotate;
+        var touchPosX = this.PuyoPos2Grid_X(this.mInput.mPosX);
+        var isLeft = this.mInput.mIsTouch && this.mParam.mPuyoX > touchPosX;
+        var isRight = this.mInput.mIsTouch && this.mParam.mPuyoX < touchPosX;
+
+        if (isRot)
+        {
+            if (this.mParam.mPuyoRotateState == this.mParam.ePuyoRotateState.None)
+            {
+                if (this._ValidateRotation(1,1))
+                {
+                    this._RotatePuyo(1, 1);
+                }
+                else if (this._ValidateRotation(1,2))
+                {
+                    this._RotatePuyo(1, 2);
+                }
+            }
+        }
+        if (isLeft)
+        {
+            this._PuyoMoveLeft();
+        }
+        if (isRight)
+        {
+            this._PuyoMoveRight();
+        }
         
         // 回転更新
         switch (this.mParam.mPuyoRotateState)
         {
-            case this.mParam.ePuyoRotateState.Left: _UpdatePuyoState_RotateLeft(dt); break;
-            case this.mParam.ePuyoRotateState.Right: _UpdatePuyoState_RotateRight(dt); break;
+            case this.mParam.ePuyoRotateState.Left: this._UpdatePuyoState_RotateLeft(dt); break;
+            case this.mParam.ePuyoRotateState.Right: this._UpdatePuyoState_RotateRight(dt); break;
         }
         // 移動更新
         switch (this.mParam.mPuyoMoveState)
         {
             case this.mParam.ePuyoMoveState.Left: this._UpdatePuyoState_MoveLeft(dt); break;
             case this.mParam.ePuyoMoveState.Right: this._UpdatePuyoState_MoveRight(dt); break;
+            case this.mParam.ePuyoMoveState.Up: this._UpdatePuyoState_MoveUp(dt); break;
         }
 
         // 落下更新
         this._UpdatePuyoState_Fall(dt);
+    }
+
+    //--------------------------------------
+    // ぷよ　上に移動
+    _PuyoMoveUp()
+    {
+        if (this.mParam.mPuyoMoveState != this.mParam.ePuyoMoveState.None) return;
+        // this.mParam.mPuyoY--;
+        this.mParam.mActualPuyoY = this.mParam.mPuyoY * gGame.mPuyoImgSize;
+        this.mParam.mPuyoMoveState = this.mParam.ePuyoMoveState.Up;
+        this.mParam.mPuyoMoveAnimSec = this.mParam.MOVE_ANIM_SEC;
+    }
+
+    //--------------------------------------
+    // ぷよ　左に移動
+    _PuyoMoveLeft()
+    {
+        if (this.mParam.mPuyoMoveState != this.mParam.ePuyoMoveState.None) return;
+        // 移動先
+        var newX1 = this.mParam.mPuyoX-1;
+        var newY1 = this.mParam.mPuyoY;
+        if (newX1 < 0 || newX1 >= gGame.PUYO_X_MAX) return;
+        if (newY1 < 0 || newY1 >= gGame.PUYO_Y_MAX) return;
+        var newX2 = this._GetAnotherPuyoX(this.mParam.mPuyoDir, newX1);
+        var newY2 = this._GetAnotherPuyoY(this.mParam.mPuyoDir, newY1);
+        if (newX2 < 0 || newX2 >= gGame.PUYO_X_MAX) return;
+        if (newY2 < 0 || newY2 >= gGame.PUYO_Y_MAX) return;
+        var newMap1 = GetMapIndex(newX1, newY1);
+        var newMap2 = GetMapIndex(newX2, newY2);
+        if (this.mParam.mMap[newMap1] == 0 && this.mParam.mMap[newMap2] == 0)
+        {
+            this.mParam.mPuyoX--;
+            this.mParam.mPuyoMoveState = this.mParam.ePuyoMoveState.Left;
+            this.mParam.mPuyoMoveAnimSec = this.mParam.MOVE_ANIM_SEC;
+        }
+    }
+
+    //--------------------------------------
+    // ぷよ　右に移動
+    _PuyoMoveRight()
+    {
+        if (this.mParam.mPuyoMoveState != this.mParam.ePuyoMoveState.None) return;
+        // 移動先
+        var newX1 = this.mParam.mPuyoX+1;
+        var newY1 = this.mParam.mPuyoY;
+        if (newX1 < 0 || newX1 >= gGame.PUYO_X_MAX) return;
+        if (newY1 < 0 || newY1 >= gGame.PUYO_Y_MAX) return;
+        var newX2 = this._GetAnotherPuyoX(this.mParam.mPuyoDir, newX1);
+        var newY2 = this._GetAnotherPuyoY(this.mParam.mPuyoDir, newY1);
+        if (newX2 < 0 || newX2 >= gGame.PUYO_X_MAX) return;
+        if (newY2 < 0 || newY2 >= gGame.PUYO_Y_MAX) return;
+        var newMap1 = GetMapIndex(newX1, newY1);
+        var newMap2 = GetMapIndex(newX2, newY2);
+        if (this.mParam.mMap[newMap1] == 0 && this.mParam.mMap[newMap2] == 0)
+        {
+            this.mParam.mPuyoX++;
+            this.mParam.mPuyoMoveState = this.mParam.ePuyoMoveState.Right;
+            this.mParam.mPuyoMoveAnimSec = this.mParam.MOVE_ANIM_SEC;
+        }
+    }
+
+    _GetAnotherPuyoX(state,pos)
+    {
+        switch (state)
+        {
+            case this.mParam.ePuyoDir.Up: return pos;
+            case this.mParam.ePuyoDir.Down: return pos;
+            case this.mParam.ePuyoDir.Right: return pos + 1;
+            case this.mParam.ePuyoDir.Left: return pos - 1;
+        }
+    }
+    _GetAnotherPuyoY(state,pos)
+    {
+        switch (state)
+        {
+            case this.mParam.ePuyoDir.Up: return pos - 1;
+            case this.mParam.ePuyoDir.Down: return pos + 1;
+            case this.mParam.ePuyoDir.Right: return pos;
+            case this.mParam.ePuyoDir.Left: return pos;
+        }
+    }
+
+    //--------------------------------------
+    // ぷよ　回転できるかチェック
+    // rotDir -1=左、1=右
+    _ValidateRotation(rotDir, rotNum)
+    {
+        // 回転後の回転ステート
+        var rotState = (this.mParam.mPuyoDir + (rotDir * rotNum) + (this.mParam.ePuyoDir.MAX * rotNum)) % this.mParam.ePuyoDir.MAX;
+        switch (rotState)
+        {
+            case this.mParam.ePuyoDir.Up:
+            case this.mParam.ePuyoDir.Down:
+                return true;
+            case this.mParam.ePuyoDir.Right:
+                {
+                    var x = this.mParam.mPuyoX + 1;
+                    var map2 = GetMapIndex(x, this.mParam.mPuyoY);
+                    if (x < gGame.PUYO_X_MAX || this.mParam.mMap[map2] != 0)
+                    {
+                        x = x - 1;
+                    }
+                    var map1 = GetMapIndex(x - 1, this.mParam.mPuyoY);
+                    return this.mParam.mMap[map1] == 0;
+                }
+            case this.mParam.ePuyoDir.Left:
+                {
+                    var x = this.mParam.mPuyoX - 1;
+                    var map2 = GetMapIndex(x, this.mParam.mPuyoY);
+                    if (x > 0 || this.mParam.mMap[map2] != 0)
+                    {
+                        x = x + 1;
+                    }
+                    var map1 = GetMapIndex(x + 1, this.mParam.mPuyoY);
+                    return this.mParam.mMap[map1] == 0;
+                }
+        }
+        return true;
+    }
+
+    //--------------------------------------
+    // ぷよ回転
+    _RotatePuyo(rotDir, rotNum)
+    {
+        switch (rotDir)
+        {
+            case -1: // LEFT
+                this._RotateLeftPuyo(rotNum);
+                break;
+            case 1: // RIGHT
+                this._RotateRightPuyo(rotNum);
+                break;
+        }
+        this.mParam.mPuyoRotAnimSec = this.mParam.ROTATE_ANIM_SEC;
+        this._CollectRotation();
+    }
+
+    //--------------------------------------
+    // ぷよ　左回転
+    _RotateLeftPuyo(rotNum)
+    {
+        for (var i=0; i<rotNum; ++i)
+        {
+            this.mParam.mPuyoDir = (this.mParam.mPuyoDir - 1) + this.mParam.ePuyoDir.MAX;
+            this.mParam.mPuyoDir = this.mParam.mPuyoDir % this.mParam.ePuyoDir.MAX;
+            this.mParam.mPuyoRotateState = this.mParam.ePuyoRotateState.Left;
+        }
+    }
+
+    //--------------------------------------
+    // ぷよ　右回転
+    _RotateRightPuyo(rotNum)
+    {
+        for (var i=0; i<rotNum; ++i)
+        {
+            this.mParam.mPuyoDir++;
+            this.mParam.mPuyoDir = this.mParam.mPuyoDir % this.mParam.ePuyoDir.MAX;
+            this.mParam.mPuyoRotateState = this.mParam.ePuyoRotateState.Right;
+        }
+    }
+
+    //--------------------------------------
+    // ぷよ　回転後にはみ出てたらずらす
+    _CollectRotation()
+    {
+        switch (this.mParam.mPuyoDir)
+        {
+            case this.mParam.ePuyoDir.Up:
+                return;
+        
+            case this.mParam.ePuyoDir.Down:
+                {
+                    var map = GetMapIndex(this.mParam.mPuyoX, this.mParam.mPuyoY + 1);
+                    if ((this.mParam.mPuyoY + 1) >= (gGame.PUYO_Y_MAX - 1) || this.mParam.mMap[map] != 0)
+                    {
+                        this._PuyoMoveUp();
+                    }
+                    return;
+                }
+
+            case this.mParam.ePuyoDir.Left:
+                {
+                    var map = GetMapIndex(this.mParam.mPuyoX - 1, this.mParam.mPuyoY);
+                    if ((this.mParam.mPuyoX - 1) < 0 || this.mParam.mMap[map] != 0)
+                    {
+                        this._PuyoMoveRight();
+                    }
+                    return;
+                }
+
+            case this.mParam.ePuyoDir.Right:
+                {
+                    var map = GetMapIndex(this.mParam.mPuyoX + 1, this.mParam.mPuyoY);
+                    if ((this.mParam.mPuyoX + 1) >= gGame.PUYO_X_MAX || this.mParam.mMap[map] != 0)
+                    {
+                        this._PuyoMoveLeft();
+                    }
+                    return;
+                }
+        }
     }
 
     //--------------------------------------
@@ -144,7 +374,7 @@ class PlayerInfo
         if (this._CanFallDown())
         {
             // 下がる処理
-            this.mParam.mPuyoY += speed;
+            this._PuyoDown(speed)
         }
         else
         {
@@ -166,7 +396,7 @@ class PlayerInfo
                 // @TODO ぷよを固定する
                 var puyo1 = parseInt(this.mParam.mCurrentPuyo / 10);
                 var x1 = this.mParam.mPuyoX;
-                var y1 = parseInt(this.mParam.mPuyoY / gGame.mPuyoImgSize);
+                var y1 = this.mParam.mPuyoY;
                 var index1 = GetMapIndex(x1,y1);
                 var puyo2 = this.mParam.mCurrentPuyo % 10;
                 var x2 = x1;
@@ -186,6 +416,14 @@ class PlayerInfo
                 this.mMoveState = this.eMoveState.Check;
             }
         }
+    }
+
+    //--------------------------------------
+    // ぷよステート更新 MoveLeft
+    _PuyoDown(downValue)
+    {
+        this.mParam.mActualPuyoY += downValue;
+        this.mParam.mPuyoY = parseInt(this.mParam.mActualPuyoY / gGame.mPuyoImgSize);
     }
 
     //--------------------------------------
@@ -215,6 +453,19 @@ class PlayerInfo
     }
 
     //--------------------------------------
+    // ぷよステート更新 MoveUp
+    _UpdatePuyoState_MoveUp(dt)
+    {
+        this.mParam.mPuyoMoveAnimSec -= dt;
+        if (this.mParam.mPuyoMoveAnimSec < 0)
+        {
+            this.mParam.mPuyoMoveAnimSec = 0;
+            // 移動を終了する
+            this.mParam.mPuyoMoveState = this.mParam.ePuyoMoveState.None;
+        }
+    }
+
+    //--------------------------------------
     // ぷよステート更新 RotateLeft
     _UpdatePuyoState_RotateLeft(dt)
     {
@@ -223,7 +474,7 @@ class PlayerInfo
         {
             this.mParam.mPuyoRotAnimSec = 0;
             // 回転を終了する
-            this.mParam.mPuyoRotState = this.mParam.ePuyoRotState.None;
+            this.mParam.mPuyoRotateState = this.mParam.ePuyoRotateState.None;
         }
     }
 
@@ -236,7 +487,7 @@ class PlayerInfo
         {
             this.mParam.mPuyoRotAnimSec = 0;
             // 回転を終了する
-            this.mParam.mPuyoRotState = this.mParam.ePuyoRotState.None;
+            this.mParam.mPuyoRotateState = this.mParam.ePuyoRotateState.None;
         }
     }
 
@@ -244,20 +495,24 @@ class PlayerInfo
     // 現在のぷよが下がれるかどうか
     _CanFallDown()
     {
-        var grid_x = this.mParam.mPuyoX;
-        var grid_y = this.PuyoPos2Grid_Y(this.mParam.mPuyoY);
-        
         // Yが一ブロックピッタリ
-        var isMaxDetailY = this.mParam.mPuyoY > gGame.mPuyoImgSize;
+        var isMaxDetailY = this.mParam.mActualPuyoY > gGame.mPuyoImgSize;
         if (isMaxDetailY == false) return true; // ピッタリじゃないときは下に下がれる 
         // 下が限界値
-        var isMaxY = grid_y > gGame.PUYO_Y_MAX; // 下が限界値
+        var isMaxY = this.mParam.mPuyoY > gGame.PUYO_Y_MAX; // 下が限界値
         if (isMaxY)
         {
             return false;
         }
+        var grid_x1 = this.mParam.mPuyoX;
+        var grid_y1 = this.mParam.mPuyoY;
+        var map1 = GetMapIndex(grid_x1, grid_y1+1);
+        var grid_x2 = this._GetAnotherPuyoX(this.mParam.mPuyoDir, this.mParam.mPuyoX);
+        var grid_y2 = this._GetAnotherPuyoY(this.mParam.mPuyoDir, this.mParam.mPuyoY);
+        var map2 = GetMapIndex(grid_x2, grid_y2+1);
+        
         // 下にすでにぷよが存在する
-        var isExistBottom = this.mParam.mMap[GetMapIndex(grid_x, grid_y+1)] != 0;
+        var isExistBottom = this.mParam.mMap[map1] != 0 || this.mParam.mMap[map2] != 0;
         if (isExistBottom)
         {
             return false;
@@ -354,8 +609,8 @@ class PlayerInfo
         var vec_x = Math.cos(rotRad) * distance;
         var vec_y = Math.sin(rotRad) * distance;
 
-        this.mBGCtrl.DrawPuyoUnit(puyo1, actualX + animX, this.mParam.mPuyoY);
-        this.mBGCtrl.DrawPuyoUnit(puyo2, actualX + animX +vec_x, this.mParam.mPuyoY + vec_y);
+        this.mBGCtrl.DrawPuyoUnit(puyo1, actualX, this.mParam.mActualPuyoY);
+        this.mBGCtrl.DrawPuyoUnit(puyo2, actualX+vec_x, this.mParam.mActualPuyoY + vec_y);
 
         // @TODO 予測を表示
     }
@@ -397,7 +652,11 @@ class PlayerInfo
     // デバッグ表示
     _DebugDrawInfo()
     {
-        var str = "";
+        var touchPosX = this.PuyoPos2Grid_X(this.mInput.mPosX);
+        var isLeft = this.mInput.mIsTouch && this.mParam.mPuyoX > touchPosX;
+        var isRight = this.mInput.mIsTouch && this.mParam.mPuyoX < touchPosX;
+
+        var str = "Puyo Position : (" + this.mParam.mPuyoX + ", " + this.mParam.mPuyoY + ")\r\n";
         for (var y=0; y<gGame.PUYO_Y_MAX; ++y)
         {
             for (var x=0; x<gGame.PUYO_X_MAX; ++x)
@@ -409,6 +668,11 @@ class PlayerInfo
         }
         str += "\r\n";
         str += "Current Move State : " + this.mMoveState + "\r\n";
+        str += "Current Puyo Rotate State : " + this.mParam.mPuyoRotateState + "\r\n";
+        str += "Current Puyo Move   State : " + this.mParam.mPuyoMoveState + "\r\n";
+        str += "Current Puyo Move   Anim Sec : " + this.mParam.mPuyoMoveAnimSec + "\r\n";
+        str += "Is Puyo Move Left Request : " + isLeft + "\r\n";
+        str += "Is Puyo Move Right Request : " + isRight + "\r\n";
         str += "Current : " + this.mParam.mCurrentPuyo + "\r\n";
         for (var i=0; i<gGame.NEXT_NUM; i++)
         {

@@ -35,10 +35,10 @@ function UpdateProfile(dt)
     // var elapsed_time = now_time - m_lastUpdateTime;
     var elapsed_time = now_time - gGame.mLastUpdateTime;
 
-    var str = "last update time : "+ gGame.mLastUpdateTime + "\r\n";
-    str += "elapsed time : " + (dt * 1000.0).toFixed(2) + " msec (target elapsed time : " + gGame.mDeltTime.toFixed(2) + ")\r\n";
-    str += "FPS : " + (1.0 / dt).toFixed(2) + "(target FPS : " + gGame.mTargetFPS + ") \r\n";
-    str += "Processing time : " + Number(gGame.mProcessingTime).toFixed(2) + "msec\r\n";
+    var str = "last update time : "+ gGame.mLastUpdateTime.toFixed(2) + "\n";
+    str += "elapsed time : " + (dt * 1000.0).toFixed(2) + " msec \n(target elapsed time : " + gGame.mDeltTime.toFixed(2) + ")\r\n";
+    str += "FPS : " + (1.0 / dt).toFixed(2) + "\n(target FPS : " + gGame.mTargetFPS + ") \n";
+    str += "Processing time : " + Number(gGame.mProcessingTime).toFixed(2) + "msec\n";
 
     gGame.mFPSBlock.innerText = str;
 }

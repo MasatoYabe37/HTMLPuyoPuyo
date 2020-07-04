@@ -22,14 +22,16 @@ class GameParam
             None : 0,
             Left : 1,
             Right : 2,
+            Up : 3,
         }
-        this.PUYO_FALL_COUNT = 30;
+        this.mScore = 0;
+        this.mSpeed = 100;
+        this.PUYO_FALL_COUNT = this.mSpeed * 1.0;
         this.mRand = new Random();
         this.mMap = new Array();
-        this.mScore = 0;
-        this.mSpeed = 20;
         this.mNextPuyo = new Array();
         this.mCurrentPuyo = 0;
+        this.mActualPuyoY = 0; // 実際のy位置
         this.mPuyoY = 0; // y は 位置
         this.mPuyoX = 0; // x は グリッド
         this.PUYO_INIT_POS_X = 0;
@@ -38,9 +40,9 @@ class GameParam
         this.mPuyoRotateState = this.ePuyoRotateState.None;
         this.mPuyoMoveState = this.ePuyoMoveState.None;
         this.mPuyoDir = this.ePuyoDir.Up;
-        this.ROTATE_ANIM_SEC = 0.3;
+        this.ROTATE_ANIM_SEC = 0.1;
         this.MOVE_ANIM_SEC = 0.1;
-        this.mRotFallRate = 0.5;
+        this.mRotFallRate = 0;
         this.mPuyoRotAnimSec = 0;
         this.mPuyoMoveAnimSec = 0;
     }

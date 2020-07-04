@@ -5,21 +5,6 @@
 ///==================================================
 class Background
 {
-    // 変数定義
-    // _mBGLeft;
-    // _mBGRight;
-    // _mBGTop;
-    // _mBGBottom;
-    // _mBGImgOffset_X;
-    // _mBGImgOffset_Y;
-    // _mScoreOffset_X;
-    // _mScoreOffset_Y;
-    // _mFooterHeight;              // フッタの高さ
-    // _mScoreImgSizeX;             // スコア画像のサイズ
-    // _mScoreImgSizeY;             // スコア画像のサイズ
-    // _mScoreLength;               // スコアの表示桁数
-
-
     constructor()
     {
         // 変数定義
