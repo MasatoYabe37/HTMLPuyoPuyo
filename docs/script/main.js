@@ -77,12 +77,21 @@ function Update(dt)
 // メインループ
 function main()
 {
+
     // 経過時間計測
     var s_time = performance.now();
     var elapsed_time = (s_time - gGame.mLastUpdateTime) / 1000.0; //(秒)
 
-    // メイン更新
-    Update(elapsed_time);
+    if (gGame.mIsRun) 
+    {
+        // キャンバスサイズを毎フレーム更新する
+        var w = gGame.mMainDiv.clientWidth;
+        var h = gGame.mMainDiv.clientHeight;
+        gGame.mMainCanvasElement.setAttribute("width", w);
+        gGame.mMainCanvasElement.setAttribute("height", h);
+        // メイン更新
+        Update(elapsed_time);
+    }
 
     // 時間記録＆処理時間計測
     gGame.mLastUpdateTime = performance.now();

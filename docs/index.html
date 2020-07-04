@@ -1,18 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html  lang="ja">
     <head>
         <meta charset="utf-8">
         <title>ぷよぷよ</title>
+        <style type="text/css">
+            .debug_left
+            {
+                display: inline-block;
+                vertical-align:top;
+                width: 10%;
+                border:solid;
+            }
+            .main
+            { 
+                display: inline-block;
+                vertical-align:top;
+                border:solid; 
+                width:50%; 
+                height:850px; 
+            }
+            .debug_right
+            {
+                display: inline-block;
+                vertical-align:top;
+                width: 30%;
+                border:solid;
+            }
+        </style>
     </head>
     <body>
         <header>
             <h1>ぷよぷよ</h1>
         </header>
-        <canvas id="mainCanvas" style="width=100% height=100"></canvas>
-        <div id="debug"></div>
-        <div id="profiler"></div>
-        <div id="touch"></div>
-        <div id="click"></div>
+        <main>
+            <div id="debug_left" class="debug_left">
+                <form>
+                    <input type="button" value="開始/停止" onclick="gGame.Start_Stop()">
+                </form>
+            </div>
+            <div id="main" class="main">
+                <canvas id="mainCanvas">このブロックではCanvasエレメントを使用します。HTML5が有効ではない可能性があります。</canvas>
+            </div>
+            <div id="debug_right" class="debug_right">
+                <div id="trace"></div>
+                <div id="profiler"></div>
+                <div id="touch"></div>
+                <div id="click"></div>
+            </div>
+        </main>
+        
         <!-- jQuery 読み込み 
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         -->

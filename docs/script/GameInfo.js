@@ -25,6 +25,7 @@ class GameInfo
 
     constructor()
     {
+        this.mIsRun = false;
         this.mPlayerNum = 1;
         this.mTargetFPS = 30;
         this.mDeltTime = 1000.0 / this.mTargetFPS;
@@ -40,13 +41,10 @@ class GameInfo
             this.mPlayer[i] = new PlayerInfo(i);
         }
         // UIエレメント取得
+        this.mMainDiv = document.getElementById("main");
         this.mMainCanvasElement = document.getElementById("mainCanvas");
-        this.mMainCanvas = null;
-        if (this.mMainCanvasElement != null)
-        {
-            this.mMainCanvas = this.mMainCanvasElement.getContext("2d");
-        }
-        this.mDebugBlock = document.getElementById("debug");
+        this.mMainCanvas = this.mMainCanvasElement.getContext("2d");
+        this.mDebugBlock = document.getElementById("trace");
         this.mFPSBlock = document.getElementById("profiler");
         // セットアップ完了フラグを建てる
         this.mIsSetuped = true;
@@ -58,6 +56,11 @@ class GameInfo
         {
             this.mPlayer[i].Init(rndSeed);
         }
+    }
+
+    Start_Stop()
+    {
+        this.mIsRun = !this.mIsRun;
     }
 }
 
