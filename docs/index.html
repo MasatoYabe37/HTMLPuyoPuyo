@@ -17,11 +17,13 @@
                 vertical-align:top;
                 border:solid; 
                 width:50%; 
-                height:850px; 
+                height:850px;
             }
             .mainCanvas
             {
                 display: block;
+                user-select: none;
+                -webkit-user-select:none;
             }
             .debug_right
             {
@@ -34,7 +36,7 @@
     </head>
     <body>
         <header>
-            <h1>ぷよぷよ</h1>
+            <h1>ぷよぷよ　iPad</h1>
         </header>
         <main>
             <div id="debug_left" class="debug_left">
@@ -49,6 +51,7 @@
                 </canvas>
             </div>
             <div id="debug_right" class="debug_right">
+                <div id="click_event"></div>
                 <div id="trace"></div>
                 <div id="profiler"></div>
                 <div id="touch"></div>
@@ -59,6 +62,7 @@
         <!-- jQuery 読み込み 
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         -->
+        <script src="./script/NoScroll.js" type="text/javascript"></script>
         <script src="./script/InputManager.js" type="text/javascript"></script>
         <script src="./script/GlobalMethod.js" type="text/javascript"></script>
         <script src="./script/Random.js" type="text/javascript"></script>

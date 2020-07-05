@@ -27,8 +27,8 @@ class InputManager
         // Input.mTouchStartPosX = eventInfo.clientX;
         // Input.mTouchStartPosY = eventInfo.clientY;
         
-        // var touchDiv = document.getElementById("click");
-        // touchDiv.innerText = "Click down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        var touchDiv = document.getElementById("click_event");
+        touchDiv.innerText = "Click down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
     }
     _OnClickMoveMethod(eventInfo)
     {
@@ -36,8 +36,8 @@ class InputManager
         Input.mTouchPosX = eventInfo.clientX;
         Input.mTouchPosY = eventInfo.clientY;
         
-        // var touchDiv = document.getElementById("click");
-        // touchDiv.innerText = "Click moved! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        var touchDiv = document.getElementById("click_event");
+        touchDiv.innerText = "Click moved! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
     }
     _OnClickEndMethod(eventInfo)
     {
@@ -52,12 +52,12 @@ class InputManager
         // var len = Math.sqrt(lenX * lenX + lenY * lenY);
         // var isRotate = len < Input.DETECT_ROT_LENGTH;
 
-        // var touchDiv = document.getElementById("click");
+        var touchDiv = document.getElementById("click_event");
         // var str = "Click up! : (" + posX + ", " + posY + ")\n";
         // str += "LenX : " + lenX + "\n";
         // str += "LenY : " + lenY + "\n";
         // str += "Len : " + len.toFixed(2) + "\n";
         // str += "Rotate : " + isRotate + "\n";
-        // touchDiv.innerText = str;
+        touchDiv.innerText = "Click up!";
     }
 }

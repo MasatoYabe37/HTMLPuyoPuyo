@@ -3,6 +3,9 @@
 // 初期化
 function OnStartApplication()
 {
+    // スクロール禁止
+    scroll_off();
+    
     var now = new Date();
     var time = now.getTime();
     var yearSeed = (parseInt(now.getUTCFullYear()) << 4);
