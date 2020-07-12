@@ -14,23 +14,62 @@ class InputManager
         // this.mTouchStartPosX = 0;
         // this.mTouchStartPosY = 0;
 
+        canvas.addEventListener("touchstart", this._OnTouchStartMethod, false);
+        canvas.addEventListener("touchmove", this._OnTouchMoveMethod, false);
+        canvas.addEventListener("touchend", this._OnTouchEndMethod, false);
+        // マウスでのイベント
         canvas.addEventListener("mousedown", this._OnClickStartMethod, false);
         canvas.addEventListener("mousemove", this._OnClickMoveMethod, false);
         canvas.addEventListener("mouseup", this._OnClickEndMethod, false);
     }
+    
+    _OnTouchStartMethod(eventInfo)
+    {
+        if (Input.mIsTouched) return;
+        Input.mIsTouched = true;
+        Input.mTouchPosX = eventInfo.touches[0].pageX;
+        Input.mTouchPosY = eventInfo.touches[0].pageY;
+                
+        //var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Touch down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        
+        eventInfo.stopPropagation();
+    }
+    _OnTouchMoveMethod(eventInfo)
+    {
+        if (Input.mIsTouched == false) return;
+        Input.mTouchPosX = eventInfo.touches[0].pageX;
+        Input.mTouchPosY = eventInfo.touches[0].pageY;
+        
+        // var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Touch moved! : (" + Input.mTouchPosX + ", " + Input.mTouchPosY + ")";
+        
+        eventInfo.preventDefault();
+        eventInfo.stopPropagation();
+    }
+    _OnTouchEndMethod(eventInfo)
+    {
+        if (Input.mIsTouched == false) return;
+        Input.mIsTouched = false;
+        // Input.mTouchPosX = eventInfo.touches[0].pageX;
+        // Input.mTouchPosY = eventInfo.touches[0].pageY;
+        
+        // var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Touch up!";
+        
+        eventInfo.stopPropagation();
+    }
+    
     _OnClickStartMethod(eventInfo)
     {
         if (Input.mIsTouched) return;
         Input.mIsTouched = true;
         Input.mTouchPosX = eventInfo.clientX;
         Input.mTouchPosY = eventInfo.clientY;
-        // Input.mTouchStartPosX = eventInfo.clientX;
-        // Input.mTouchStartPosY = eventInfo.clientY;
+                
+        // var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Click down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
         
-        var touchDiv = document.getElementById("click_event");
-        touchDiv.innerText = "Click down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
-        
-        eventInfo.stopPropagation();
     }
     _OnClickMoveMethod(eventInfo)
     {
@@ -38,11 +77,9 @@ class InputManager
         Input.mTouchPosX = eventInfo.clientX;
         Input.mTouchPosY = eventInfo.clientY;
         
-        var touchDiv = document.getElementById("click_event");
-        touchDiv.innerText = "Click moved! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        // var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Click moved! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
         
-        eventInfo.preventDefault();
-        eventInfo.stopPropagation();
     }
     _OnClickEndMethod(eventInfo)
     {
@@ -50,22 +87,9 @@ class InputManager
         Input.mIsTouched = false;
         Input.mTouchPosX = eventInfo.clientX;
         Input.mTouchPosY = eventInfo.clientY;
-        // var posX = eventInfo.clientX;
-        // var posY = eventInfo.clientY;
-        // var lenX = Input.mTouchStartPosX - posX;
-        // var lenY = Input.mTouchStartPosY - posY;
-        // var len = Math.sqrt(lenX * lenX + lenY * lenY);
-        // var isRotate = len < Input.DETECT_ROT_LENGTH;
-
-        var touchDiv = document.getElementById("click_event");
-        // var str = "Click up! : (" + posX + ", " + posY + ")\n";
-        // str += "LenX : " + lenX + "\n";
-        // str += "LenY : " + lenY + "\n";
-        // str += "Len : " + len.toFixed(2) + "\n";
-        // str += "Rotate : " + isRotate + "\n";
-        touchDiv.innerText = "Click up!";
         
+        // var touchDiv = document.getElementById("click_event");
+        // touchDiv.innerText = "Click up!";
         
-        eventInfo.stopPropagation();
     }
 }

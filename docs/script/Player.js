@@ -87,6 +87,8 @@ class PlayerInfo
 
         this.mBGCtrl.DrawFrame();
         this.mBGCtrl.DrawScore(this.mParam.mScore);
+        
+        gGame.mMainCanvas.strokeRect(this.mInput.mPosX, this.mInput.mPosY, 4, 4);
         this.mBGCtrl.MascDraw();
     }
 

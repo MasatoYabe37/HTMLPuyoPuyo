@@ -46,11 +46,11 @@ class PlayerInput
 
     _ConvTouchPosX(pos)
     {
-        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().left) * gGame.mCanvasScale;
+        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().left) / gGame.mCanvasScale;
     }
     _ConvTouchPosY(pos)
     {
-        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().top) * gGame.mCanvasScale;
+        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().top) / gGame.mCanvasScale;
     }
 
     _InnerPlayerArae()
@@ -68,8 +68,8 @@ class PlayerInput
     {
         this.mIsTouchStart = true;
         this.mIsTouch = true;
-        this.mTouchStartPosX = this._ConvTouchPosX(Input.mTouchPosX) - this.mPlayer.mBGCtrl._mBGLeft;
-        this.mTouchStartPosY = this._ConvTouchPosY(Input.mTouchPosY) - this.mPlayer.mBGCtrl._mBGTop;
+        this.mTouchStartPosX = (this._ConvTouchPosX(Input.mTouchPosX) - this.mPlayer.mBGCtrl._mBGLeft);
+        this.mTouchStartPosY = (this._ConvTouchPosY(Input.mTouchPosY) - this.mPlayer.mBGCtrl._mBGTop);
         this.mPosX = this.mTouchStartPosX;
         this.mPosY = this.mTouchStartPosY;
         this.mIsRotate = false;
