@@ -14,9 +14,9 @@ class PlayerInfo
         {
             None            : 0,    // なにもなし
             Dropping        : 1,    // ぷよ　落ちてる
-            Check           : 2,    // ぷよ　消えチェック
-            DestroyAnim     : 3,    // ぷよ　消えるアニメーション
-            Fall            : 4,    // ぷよ　消えた後の上のぷよが落ちる
+            Fall            : 2,    // ぷよ　消えた後の上のぷよが落ちる
+            Check           : 3,    // ぷよ　消えチェック
+            DestroyAnim     : 4,    // ぷよ　消えるアニメーション
             NextInterval    : 5,    // 次のぷよ待ち
             NextPuyo        : 6,    // 次のぷよを生成     
         }
@@ -59,14 +59,15 @@ class PlayerInfo
         switch (this.mMoveState)
         {
             case this.eMoveState.None: break;
+
             // ぷよが落ちてくるステート
             case this.eMoveState.Dropping: this._UpatePuyo(dt); break;
+            // ぷよが消えた後の、上にあるぷよを落とす処理
+            case this.eMoveState.Fall: this._UpdateFallPuyo(dt); break;
             // ぷよが落ち切った後の消えるチェック
             case this.eMoveState.Check: this._CheckDestroyPuyo(); break;
             // ぷよが消えた場合の消えた演出＆スコア加算
             case this.eMoveState.DestroyAnim: this._UpdateDestroyPuyo(dt); break;
-            // ぷよが消えた後の、上にあるぷよを落とす処理
-            case this.eMoveState.Fall: this._UpdateFallPuyo(dt); break;
             // ぷよが落ち着いた後の、次のぷよが落ち始めるまでの休憩時間
             case this.eMoveState.NextInterval: this._UpdateNextInterval(dt); break;
             // 次のぷよを生成(1F)いらないかも…？
@@ -82,7 +83,6 @@ class PlayerInfo
     {
         this.mBGCtrl.DrawBG();
 
-        this._DrawPuyoProjection();
         this._DrawPuyo();
 
         this.mBGCtrl.DrawFrame();
@@ -171,7 +171,12 @@ class PlayerInfo
     _PuyoMoveUp()
     {
         if (this.mParam.mPuyoMoveState != this.mParam.ePuyoMoveState.None) return;
-        // this.mParam.mPuyoY--;
+        console.trace("Move up");
+        var isJustPosition = (this.mParam.mActualPuyoY - (this.mParam.mPuyoY * gGame.mPuyoImgSize)) < 0.01;
+        if (isJustPosition)
+        {
+            this.mParam.mPuyoY--;
+        }
         this.mParam.mActualPuyoY = this.mParam.mPuyoY * gGame.mPuyoImgSize;
         this.mParam.mPuyoMoveState = this.mParam.ePuyoMoveState.Up;
         this.mParam.mPuyoMoveAnimSec = this.mParam.MOVE_ANIM_SEC;
@@ -373,7 +378,7 @@ class PlayerInfo
         var speed = this.mParam.mSpeed * dt;
         
         // 下に何かがあるかどうか
-        if (this._CanFallDown())
+        if (this._CanFallDown(speed))
         {
             // 下がる処理
             this._PuyoDown(speed)
@@ -395,7 +400,7 @@ class PlayerInfo
             // これ以上下がれない
             if (this.mParam.mPuyoFallCount > this.mParam.PUYO_FALL_COUNT)
             {
-                // @TODO ぷよを固定する
+                // ぷよを固定する
                 var puyo1 = parseInt(this.mParam.mCurrentPuyo / 10);
                 var x1 = this.mParam.mPuyoX;
                 var y1 = this.mParam.mPuyoY;
@@ -415,16 +420,22 @@ class PlayerInfo
                 this.mParam.mMap[index1] = puyo1;
                 this.mParam.mMap[index2] = puyo2;
                 //次のステートに進む
-                this.mMoveState = this.eMoveState.Check;
+                this.mMoveState = this.eMoveState.Fall;
+                // 落ちるぷよを取得する
+                this._CorrectFallPuyo();
             }
         }
     }
 
     //--------------------------------------
-    // ぷよステート更新 MoveLeft
+    // ぷよ 落下
     _PuyoDown(downValue)
     {
         this.mParam.mActualPuyoY += downValue;
+        if (this.mParam.mActualPuyoY > (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize)
+        {
+            this.mParam.mActualPuyoY = (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize;
+        }
         this.mParam.mPuyoY = parseInt(this.mParam.mActualPuyoY / gGame.mPuyoImgSize);
     }
 
@@ -495,26 +506,101 @@ class PlayerInfo
 
     //--------------------------------------
     // 現在のぷよが下がれるかどうか
-    _CanFallDown()
+    _CanFallDown(speed)
     {
-        // Yが一ブロックピッタリ
-        var isMaxDetailY = this.mParam.mActualPuyoY > gGame.mPuyoImgSize;
-        if (isMaxDetailY == false) return true; // ピッタリじゃないときは下に下がれる 
-        // 下が限界値
-        var isMaxY = this.mParam.mPuyoY > gGame.PUYO_Y_MAX; // 下が限界値
-        if (isMaxY)
+        var next_pos = this.mParam.mActualPuyoY;
+        // 下向きの場合
+        if (this.mParam.mPuyoDir == this.mParam.ePuyoDir.Down)
         {
-            return false;
+            next_pos = this.mParam.mActualPuyoY + gGame.mPuyoImgSize;
         }
+        // 次進んだらアウト
+        var isJustY = next_pos >= (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize;
+        if (isJustY) return false; // ピッタリじゃないときは下に下がれる 
+
         var grid_x1 = this.mParam.mPuyoX;
         var grid_y1 = this.mParam.mPuyoY;
+        var grid_x2 = this._GetAnotherPuyoX(this.mParam.mPuyoDir, grid_x1);
+        var grid_y2 = this._GetAnotherPuyoY(this.mParam.mPuyoDir, grid_y1);
         var map1 = GetMapIndex(grid_x1, grid_y1+1);
-        var grid_x2 = this._GetAnotherPuyoX(this.mParam.mPuyoDir, this.mParam.mPuyoX);
-        var grid_y2 = this._GetAnotherPuyoY(this.mParam.mPuyoDir, this.mParam.mPuyoY);
         var map2 = GetMapIndex(grid_x2, grid_y2+1);
         
         // 下にすでにぷよが存在する
         var isExistBottom = this.mParam.mMap[map1] != 0 || this.mParam.mMap[map2] != 0;
+        if (isExistBottom)
+        {
+            return false;
+        }
+        return true;
+    }
+    //--------------------------------------
+    // 空中にあるぷよを落とす処理
+    _UpdateFallPuyo(dt)
+    {
+        var isFinished = true;
+        if (this.mParam.mFallComplete.length > 0)
+        {
+            // Fall Puyo 変数たち
+            // this.mParam.mFallComplete
+            // this.mParam.mFallPuyoId
+            // this.mParam.mFallPuyopPosX
+            // this.mParam.mFallPuyopActualPosY
+            // 下に何もないぷよを収集
+            for (var i = 0; i < this.mParam.mFallComplete.length; i++)
+            {
+                if (this.mParam.mFallComplete[i])
+                {
+                    continue;
+                }
+                isFinished = false;
+                if (this._CanFallDownUnitPuyo(this.mParam.mFallPuyopPosX[i], this.mParam.mFallPuyopActualPosY[i]))
+                {
+                    // ぷよを落下させる
+                    var speed = this.mParam.mFallingSpeed * dt;
+                    this.mParam.mFallPuyopActualPosY[i] += speed;
+                    if (this.mParam.mFallPuyopActualPosY[i] > (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize)
+                    {
+                        this.mParam.mFallPuyopActualPosY[i] = (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize;
+                    }
+                
+                }
+                else
+                {
+                    this.mParam.mFallComplete[i] = true;
+                }
+            }
+        }
+        // 次のステートへ進む
+        if (isFinished)
+        {
+            // 落ちたところのマップにidを刻みなおす
+            for (var i = 0; i < this.mParam.mFallComplete.length; i++)
+            {
+                var x = this.mParam.mFallPuyopPosX[i];
+                var y = this.PuyoGrid2Pos_Y(this.mParam.mFallPuyopActualPosY[i]);
+                var mapId = GetMapIndex(x,y);
+                var id = this.mParam.mFallPuyoId[i];
+                this.mParam.mMap[mapId] = id;
+            }
+            //次のステートに進む
+            this.mMoveState = this.eMoveState.Check;
+        }
+    }
+    //--------------------------------------
+    // 現在のぷよが下がれるかどうか単体
+    _CanFallDownUnitPuyo(x, actualY)
+    {
+        var next_pos = actualY;
+        // 次進んだらアウト
+        var isJustY = next_pos >= (gGame.PUYO_Y_MAX - 1) * gGame.mPuyoImgSize;
+        if (isJustY == false) return true; // ピッタリじゃないときは下に下がれる 
+
+        var grid_x = x;
+        var grid_y = this.PuyoPos2Grid_Y(actualY);
+        var map = GetMapIndex(grid_x, grid_y+1);
+        
+        // 下にすでにぷよが存在する
+        var isExistBottom = this.mParam.mMap[map] != 0;
         if (isExistBottom)
         {
             return false;
@@ -534,12 +620,6 @@ class PlayerInfo
 
     }
     //--------------------------------------
-    // ぷよが消えた後の、上にあるぷよを落とす処理
-    _UpdateFallPuyo(dt)
-    {
-
-    }
-    //--------------------------------------
     // ぷよが落ち着いた後の、次のぷよが落ち始めるまでの休憩時間
     _UpdateNextInterval(dt)
     {
@@ -553,10 +633,31 @@ class PlayerInfo
     }
 
     //--------------------------------------
-    // ぷよ予測描画
-    _DrawPuyoProjection()
+    // 落ちるぷよを取得
+    _CorrectFallPuyo()
     {
-
+        // 一回クリアする
+        this.mParam.mFallComplete = [];
+        this.mParam.mFallPuyoId = [];
+        this.mParam.mFallPuyopPosX = [];
+        this.mParam.mFallPuyopActualPosY = [];
+        // 下に何もないぷよを収集
+        for (var i = gGame.PUYO_Y_MAX * gGame.PUYO_X_MAX; i >= 0; --i)
+        {
+            // 下のぷよのID
+            var bottomIndex = i + gGame.PUYO_X_MAX;
+            if (this.mParam.mMap[i] != 0 && this.mParam.mMap[bottomIndex] == 0)
+            {
+                var x = GetPosX(i);
+                var y = GetPosY(i);
+                if (y >= gGame.PUYO_Y_MAX) continue;
+                this.mParam.mFallComplete.push(false);
+                this.mParam.mFallPuyoId.push(this.mParam.mMap[i]);
+                this.mParam.mFallPuyopPosX.push(x);
+                this.mParam.mFallPuyopActualPosY.push(y * gGame.mPuyoImgSize);
+                this.mParam.mMap[i] = 0;
+            }
+        }
     }
 
     //--------------------------------------
@@ -574,9 +675,64 @@ class PlayerInfo
             this.mBGCtrl.DrawPuyoUnit(this.mParam.mMap[i], x, y);
         }
 
-        // 現在落ちているぷよを表示(支点)
+        switch (this.mMoveState)
+        {
+            case this.eMoveState.None:
+                break;
+
+            case this.eMoveState.Dropping:
+                this._DrawPuyoDropping();
+                break;
+            case this.eMoveState.Fall:
+                this._DrawPuyoFall();
+                break;
+            case this.eMoveState.Check:
+                this._DrawPuyoCheck();
+                break;
+            case this.eMoveState.DestroyAnim:
+                this._DrawPuyoDestroyAnim();
+                break;
+            case this.eMoveState.NextInterval:
+                this._DrawPuyoNextInterval();
+                break;
+            case this.eMoveState.NextPuyo:
+                this._DrawPuyoNextPuyo();
+                break;  
+        }
+    }
+    
+    //--------------------------------------
+    // ぷよ 落下中の描画
+    _DrawPuyoDropping()
+    {
         var puyo1 = parseInt(this.mParam.mCurrentPuyo / 10);
         var puyo2 = parseInt(this.mParam.mCurrentPuyo % 10);
+
+        // 予測を表示
+        var proj1X = this.mParam.mPuyoX;
+        var proj1Y = this.mParam.mPuyoY;
+        proj1Y = this._GetDoroppedPosition(proj1X, proj1Y);
+        if (this.mParam.mPuyoDir == this.mParam.ePuyoDir.Down)
+        {
+            proj1Y = proj1Y - 1;
+        }
+        var proj1ActualX = this.PuyoGrid2Pos_X(proj1X);
+        var proj1ActualY = this.PuyoGrid2Pos_Y(proj1Y);
+        this.mBGCtrl.DrawPuyoProjection(puyo1, proj1ActualX, proj1ActualY);
+
+        var proj2X = this._GetAnotherPuyoX(this.mParam.mPuyoDir, this.mParam.mPuyoX);
+        var proj2Y = this._GetAnotherPuyoY(this.mParam.mPuyoDir, this.mParam.mPuyoY);
+        proj2Y = this._GetDoroppedPosition(proj2X, proj2Y);
+        if (this.mParam.mPuyoDir == this.mParam.ePuyoDir.Up)
+        {
+            proj2Y = proj2Y - 1;
+        }
+        var proj2ActualX = this.PuyoGrid2Pos_X(proj2X);
+        var proj2ActualY = this.PuyoGrid2Pos_Y(proj2Y);
+        this.mBGCtrl.DrawPuyoProjection(puyo2, proj2ActualX, proj2ActualY);
+
+
+        // 現在落ちているぷよを表示(支点)
         // 位置を計算
         var actualX = this.mParam.mPuyoX * gGame.mPuyoImgSize;
         var animX = gGame.mPuyoImgSize * (this.mParam.mPuyoMoveAnimSec / this.mParam.MOVE_ANIM_SEC);
@@ -613,8 +769,54 @@ class PlayerInfo
 
         this.mBGCtrl.DrawPuyoUnit(puyo1, actualX, this.mParam.mActualPuyoY);
         this.mBGCtrl.DrawPuyoUnit(puyo2, actualX+vec_x, this.mParam.mActualPuyoY + vec_y);
+    }
 
-        // @TODO 予測を表示
+    //--------------------------------------
+    // ぷよ 操作できない落下中の描画
+    _DrawPuyoFall()
+    {
+    }
+
+    //--------------------------------------
+    // ぷよ 操作できない落下中の描画
+    _DrawPuyoCheck()
+    {
+    }
+
+    //--------------------------------------
+    // ぷよ 操作できない落下中の描画
+    _DrawPuyoDestroyAnim()
+    {
+
+    }
+
+    //--------------------------------------
+    // ぷよ 操作できない落下中の描画
+    _DrawPuyoNextInterval()
+    {
+
+    }
+
+    //--------------------------------------
+    // ぷよ 操作できない落下中の描画
+    _DrawPuyoNextPuyo()
+    {
+
+    }
+
+    //--------------------------------------
+    // 落下した場合の最下端の位置を取得
+    _GetDoroppedPosition(cur_x, cur_y)
+    {
+        for (var y = cur_y; y<gGame.PUYO_Y_MAX; y++)
+        {
+            var index = GetMapIndex(cur_x, y+1);
+            if (this.mParam.mMap[index] != 0)
+            {
+                return y;
+            }
+        }
+        return gGame.PUYO_Y_MAX;
     }
 
     //--------------------------------------
@@ -659,6 +861,7 @@ class PlayerInfo
         var isRight = this.mInput.mIsTouch && this.mParam.mPuyoX < touchPosX;
 
         var str = "Puyo Position : (" + this.mParam.mPuyoX + ", " + this.mParam.mPuyoY + ")\r\n";
+        str += "Puyo ActualY : (" + this.mParam.mActualPuyoY + ")\r\n";
         for (var y=0; y<gGame.PUYO_Y_MAX; ++y)
         {
             for (var x=0; x<gGame.PUYO_X_MAX; ++x)

@@ -26,6 +26,7 @@ class GameParam
         }
         this.mScore = 0;
         this.mSpeed = 100;
+        this.mFallingSpeed = 250;
         this.PUYO_FALL_COUNT = this.mSpeed * 1.0;
         this.mRand = new Random();
         this.mMap = new Array();
@@ -40,11 +41,15 @@ class GameParam
         this.mPuyoRotateState = this.ePuyoRotateState.None;
         this.mPuyoMoveState = this.ePuyoMoveState.None;
         this.mPuyoDir = this.ePuyoDir.Up;
-        this.ROTATE_ANIM_SEC = 0.1;
-        this.MOVE_ANIM_SEC = 0.1;
+        this.ROTATE_ANIM_SEC = 0.075;
+        this.MOVE_ANIM_SEC = 0.05;
         this.mRotFallRate = 0;
         this.mPuyoRotAnimSec = 0;
         this.mPuyoMoveAnimSec = 0;
+        this.mFallComplete = new Array();
+        this.mFallPuyoId = new Array();
+        this.mFallPuyopPosX = new Array();
+        this.mFallPuyopActualPosY = new Array();
     }
 
     Init(rndSeed)
@@ -60,5 +65,17 @@ class GameParam
             }
         }
         this.mRand.Init(rndSeed);
+
+        // @DEBUG
+        // 変な感じに初期ぷよを配置してみる
+        this.mMap[GetMapIndex(0,13)] = 1;
+        this.mMap[GetMapIndex(0,12)] = 1;
+        this.mMap[GetMapIndex(0,11)] = 1;
+        this.mMap[GetMapIndex(0,10)] = 1;
+        this.mMap[GetMapIndex(1,10)] = 1;
+        this.mMap[GetMapIndex(5,11)] = 1;
+        this.mMap[GetMapIndex(4,10)] = 1;
+        this.mMap[GetMapIndex(4,9)] = 1;
+        this.mMap[GetMapIndex(3,9)] = 1;
     }
 }

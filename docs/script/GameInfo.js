@@ -27,7 +27,7 @@ class GameInfo
     {
         this.mIsRun = false;
         this.mPlayerNum = 1;
-        this.mTargetFPS = 30;
+        this.mTargetFPS = 60;
         this.mDeltTime = 1000.0 / this.mTargetFPS;
         this.mLastUpdateTime = 0
         this.mPuyoImgSize = 64;
