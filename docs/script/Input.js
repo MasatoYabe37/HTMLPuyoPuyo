@@ -46,11 +46,11 @@ class PlayerInput
 
     _ConvTouchPosX(pos)
     {
-        return pos - gGame.mMainCanvasElement.getBoundingClientRect().left;
+        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().left) * gGame.mCanvasScale;
     }
     _ConvTouchPosY(pos)
     {
-        return pos - gGame.mMainCanvasElement.getBoundingClientRect().top;
+        return (pos - gGame.mMainCanvasElement.getBoundingClientRect().top) * gGame.mCanvasScale;
     }
 
     _InnerPlayerArae()

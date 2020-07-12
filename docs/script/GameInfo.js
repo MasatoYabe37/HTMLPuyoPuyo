@@ -40,6 +40,7 @@ class GameInfo
         {
             this.mPlayer[i] = new PlayerInfo(i);
         }
+        this.mCanvasScale = 0.75;
         // UIエレメント取得
         this.mMainDiv = document.getElementById("main");
         this.mMainCanvasElement = document.getElementById("mainCanvas");

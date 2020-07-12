@@ -4,7 +4,7 @@
 function OnStartApplication()
 {
     // スクロール禁止
-    scroll_off();
+    // scroll_off();
     
     var now = new Date();
     var time = now.getTime();
@@ -70,10 +70,12 @@ function Update(dt)
     }
 
     // 描画
+    gGame.mMainCanvas.scale(gGame.mCanvasScale, gGame.mCanvasScale);
     for (var i=0; i<gGame.mPlayerNum; ++i)
     {
         gGame.mPlayer[i].Draw(dt)
     }
+    
 }
 
 //==================================================

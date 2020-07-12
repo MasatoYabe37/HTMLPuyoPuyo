@@ -29,6 +29,8 @@ class InputManager
         
         var touchDiv = document.getElementById("click_event");
         touchDiv.innerText = "Click down! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        
+        eventInfo.stopPropagation();
     }
     _OnClickMoveMethod(eventInfo)
     {
@@ -38,6 +40,9 @@ class InputManager
         
         var touchDiv = document.getElementById("click_event");
         touchDiv.innerText = "Click moved! : (" + eventInfo.clientX + ", " + eventInfo.clientY + ")";
+        
+        eventInfo.preventDefault();
+        eventInfo.stopPropagation();
     }
     _OnClickEndMethod(eventInfo)
     {
@@ -59,5 +64,8 @@ class InputManager
         // str += "Len : " + len.toFixed(2) + "\n";
         // str += "Rotate : " + isRotate + "\n";
         touchDiv.innerText = "Click up!";
+        
+        
+        eventInfo.stopPropagation();
     }
 }
